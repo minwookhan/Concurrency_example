@@ -1,0 +1,18 @@
+* 순서
+** threading
+   1. download_images()
+      for구문의 다운로드 부분을 download_image() 로 따로 빼낸다
+   2. download_image() 를 쓰레드로 돌린다
+** threading_Lock
+   1. download_iamge()
+      - 다운로드 받은 전체 용량을 downloaded_bytes 변수에 누적 저장한다
+      - downloaded_bytes변수는 class instance 변수로 설정한다.
+** threading_semaphore
+   1. download_image()가 쓰레드는 url 개수 만큼 돌아가지만 한번에 4개씩만
+      다운로드 가능하도록  다운로드 코드 부분에 Semaphore를 건다
+   2. with_ context문으로 구현
+** Queue 연습
+   1. 맨 처음 원본으로 돌아간다(Thread 적용이전 버전)
+   2. download_images에서 다운완료된 Url을 바로 Queue 에 넣는다
+   3. perform_resize 에서 Queue에 목록을 가져와 resize 수행
+   4. main loop에서 download_images 와 perform_resize 를 쓰레드로 2개 동시 실행한다.
