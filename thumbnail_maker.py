@@ -58,7 +58,7 @@ class ThumbnailMakerService(object):
         for _t in threads:
             _t.join()
 
-        end = time.perf_counter()
+            
         logging.info(f"downloaded {len(img_url_list)} images  in {end-start} seconds: {self.downloaded_bytes} TOTAL BYTES")
 
     def perform_resizing(self):
