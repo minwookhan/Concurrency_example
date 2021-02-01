@@ -23,23 +23,17 @@ class ThumbnailMakerService(object):
         # 1.threading.Lock() 개체 생성
         self.dl_lock = threading.Lock()
         self.downloaded_bytes = 0
-        max_concurrent_dl = 4
-        self.dl_sem = threading.Semaphore(max_concurrent_dl)
-
 
     def download_image(self, url):
-        try:
-            self.dl_sem.acquire()
             img_filename = urlparse(url).path.split('/')[-1]
             dest_path = self.input_dir + os.path.sep + img_filename
             urlretrieve(url, dest_path)
             img_size = os.path.getsize(dest_path)
 
+        # 2. with Lock으로 인스턴스 변수 잠그고 작업
             with self.dl_lock:
                 self.downloaded_bytes += img_size
             logging.info(f"image {img_size} saved to {dest_path}")
-        finally:
-            self.dl_sem.release()
 
     def download_images(self, img_url_list):
         # validate inputs
@@ -63,7 +57,8 @@ class ThumbnailMakerService(object):
 
         for _t in threads:
             _t.join()
-        end = time.perf_counter()
+
+            
         logging.info(f"downloaded {len(img_url_list)} images  in {end-start} seconds: {self.downloaded_bytes} TOTAL BYTES")
 
     def perform_resizing(self):
