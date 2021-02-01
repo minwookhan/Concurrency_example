@@ -11,29 +11,15 @@ from PIL import Image
 FORMAT = "[%(threadName)s , %(asctime)s, %(levelname)s, %(message)s]"
 logging.basicConfig(filename='logfile.log', level=logging.DEBUG, format=FORMAT)
 
-
-# Purpose: thread worker에게 다운받은 이미지 사이지를 인스턴스변수 downloaded_byte에 누적저장
-
 class ThumbnailMakerService(object):
     def __init__(self, home_dir='.'):
         self.home_dir = home_dir
         self.input_dir = self.home_dir + os.path.sep + 'incoming'
         self.output_dir = self.home_dir + os.path.sep + 'outgoing'
 
-        # 1.threading.Lock() 개체 생성
-        self.dl_lock = threading.Lock()
-        self.downloaded_bytes = 0
-
     def download_image(self, url):
             img_filename = urlparse(url).path.split('/')[-1]
-            dest_path = self.input_dir + os.path.sep + img_filename
-            urlretrieve(url, dest_path)
-            img_size = os.path.getsize(dest_path)
-
-        # 2. with Lock으로 인스턴스 변수 잠그고 작업
-            with self.dl_lock:
-                self.downloaded_bytes += img_size
-            logging.info(f"image {img_size} saved to {dest_path}")
+            urlretrieve(url, self.input_dir + os.path.sep + img_filename)
 
     def download_images(self, img_url_list):
         # validate inputs
@@ -59,7 +45,7 @@ class ThumbnailMakerService(object):
             _t.join()
 
         end = time.perf_counter()
-        logging.info(f"downloaded {len(img_url_list)} images  in {end-start} seconds: {self.downloaded_bytes} TOTAL BYTES")
+        logging.info("downloaded {} images in {} seconds".format(len(img_url_list), end - start))
 
     def perform_resizing(self):
         # validate inputs
