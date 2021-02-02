@@ -16,6 +16,25 @@ class ThumbnailMakerService(object):
         self.input_dir = self.home_dir + os.path.sep + 'incoming'
         self.output_dir = self.home_dir + os.path.sep + 'outgoing'
         self.que = queue.Queue()
+        self.dl_que = queue.Queue()
+        self.cnt_Lock = threading.Lock()
+        self.cnt = 0;
+    def download_image(self):
+        while not self.dl_que.empty():
+            try:
+                url = self.dl_que.get(block=False)
+                img_filename = urlparse(url).path.split('/')[-1]
+                dest_path = self.input_dir + os.path.sep + img_filename
+                urlretrieve(url, dest_path)
+                self.que.put(img_filename)
+                self.dl_que.task_done()
+                with self.cnt_Lock:
+                    self.cnt += 1
+                logging.info(f"--- downloaded {self.cnt}: {img_filename}")
+
+            except queue.Empty:
+                logging.info("Queue is Empty")
+
 
     def download_images(self, img_url_list):
 
@@ -79,12 +98,16 @@ class ThumbnailMakerService(object):
         logging.info("START make_thumbnails")
         start = time.perf_counter()
 
-        t1 = threading.Thread(target=self.download_images, args=([img_url_list]))
-        t2 = threading.Thread(target=self.perform_resizing)
+        for img_url in img_url_list:
+            self.dl_que.put(img_url)
 
-        t1.start()
+        num_dl_threads = 8 #
+        for _ in range(num_dl_threads):
+            t = threading.Thread(target=self.download_image)
+            t.start()
+
+        t2 = threading.Thread(target=self.perform_resizing)
         t2.start()
-        t1.join()
         t2.join()
         end = time.perf_counter()
         logging.info("END make_thumbnails in {} seconds".format(end - start))
