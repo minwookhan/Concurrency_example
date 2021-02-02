@@ -1,4 +1,6 @@
 * 순서
+  - threading_semaphore 까지는 thread_intro branch.
+  - Queue 연습 부터는 master_branch
 ** threading
    1. download_images()
       for구문의 다운로드 부분을 download_image() 로 따로 빼낸다
@@ -11,8 +13,19 @@
    1. download_image()가 쓰레드는 url 개수 만큼 돌아가지만 한번에 4개씩만
       다운로드 가능하도록  다운로드 코드 부분에 Semaphore를 건다
    2. with_ context문으로 구현
-** Queue 연습
-   1. 맨 처음 원본으로 돌아간다(Thread 적용이전 버전)
-   2. download_images에서 다운완료된 Url을 바로 Queue 에 넣는다
-   3. perform_resize 에서 Queue에 목록을 가져와 resize 수행
-   4. main loop에서 download_images 와 perform_resize 를 쓰레드로 2개 동시 실행한다.
+** Queue 연습 1
+   1. download_images와 perform_resize 를 Que를 통해 멀티쓰레드로 돌린다.
+   2. 맨 처음 원본으로 돌아간다(Thread 적용이전 버전)
+   3. download_images에서 다운완료된 Url을 바로 Queue 에 넣는다
+   4. perform_resize 에서 Queue에 목록을 가져와 resize 수행
+   5. main loop에서 download_images 와 perform_resize 를 쓰레드로 2개 동시 실행한다.
+** Queue 연습 2
+   1. Quueu연습1의 download_images를 multithred로 동시에 받아는다
+   2. multithred 용 download_thread
+      - queue에서 Url을 가져온다
+      - que 에 미리 url이 다 차 있으므로 queue가 empty이면 thread를 멈춘다 --> .get(block=False)
+      - get(block=False) 에서 Empty가 되면 예외를 발생하므로 Try 구문으로 구현해서 예외를 받아준다.
+      - download  루틴은 download_images  에서 긁어 온다
+   3. make_thumbnail
+      - que 에 한번에 url list를 저장한다.
+      - 4개의 download image thread를 만든다.
