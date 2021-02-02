@@ -108,6 +108,8 @@ class ThumbnailMakerService(object):
 
         t2 = threading.Thread(target=self.perform_resizing)
         t2.start()
+        self.dl_que.join()
+        self.que.put(None)
         t2.join()
         end = time.perf_counter()
         logging.info("END make_thumbnails in {} seconds".format(end - start))
