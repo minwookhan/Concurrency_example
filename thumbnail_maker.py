@@ -108,8 +108,8 @@ class ThumbnailMakerService(object):
 
         t2 = threading.Thread(target=self.perform_resizing)
         t2.start()
-        self.dl_que.join()
-        self.que.put(None)
+        self.dl_que.join() # que 에 파일목록 작성 완료 대기
+        self.que.put(None) # resize 를 죽일 poison pill
         t2.join()
         end = time.perf_counter()
         logging.info("END make_thumbnails in {} seconds".format(end - start))
