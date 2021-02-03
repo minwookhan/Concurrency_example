@@ -41,3 +41,14 @@
          - 다운로드 실행 중인 download_image 의 다른 쓰레드 결과 파일 값이 que 에 저장 되지 못한다.
       8. 그래서 dl_que 의 작업이 완료 되기까지 기다린 다음 (que 에 파일목록이 다 완성된 시점) 마지막에 que 에 None 값을 저장한다.
          
+** multiprocess , threads
+   - download_image
+     1. IMG_URLS의 원소를 dl_que 에 일괄 put 한다.
+     2. download_image 가 dl_que.get()
+     3. download 끝나면 파일이름을 self.img_queue 에 put 한다.
+   - perform_resize
+     1. self.img_queue  에 파일이 들어오면 바로 que값을 가져온다
+     2. 리사이지징 작업
+
+   - perform_resize는 poison pill 로 중지 되므로 , 작업이 끝날 때 core 개수 만큼 None 을 img_queue 에 put 한다.
+     
