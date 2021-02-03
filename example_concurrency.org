@@ -51,4 +51,6 @@
      2. 리사이지징 작업
 
    - perform_resize는 poison pill 로 중지 되므로 , 작업이 끝날 때 core 개수 만큼 None 을 img_queue 에 put 한다.
-     
+   - image 다운로드가 끝난다음 img_queue 에 파일 이름이 들어간다. 따라서 img_queue 에 파일 이름이 가기 전에 multiprocess 가 만들어지면
+     바로 다음 poison pill이 삽입되는 코드로 넘어가고 멀티프로세스는 처리가안된다.
+     이를 방지하기위해 다운로드 실행이 되고 1~2초 정도 time.sleep(2)을 둬야 처리가 된다. 

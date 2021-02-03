@@ -84,7 +84,7 @@ class ThumbnailMakerService(object):
                     img.save(self.output_dir + os.path.sep + new_filename)
 
                 os.remove(self.input_dir + os.path.sep + filename)
-                logging.info(f"done resizing: {self.input_dir + os.path.sep + new_filename}")
+                logging.info(f"done resizing:{multiprocessing.current_process().pid}: {self.input_dir + os.path.sep + new_filename}")
                 self.img_queue.task_done()
 
             else:
@@ -110,22 +110,23 @@ class ThumbnailMakerService(object):
 
         num_cpu_core = multiprocessing.cpu_count()
 
+        time.sleep(2) # 최초 다운로드가 완료되어 img_queue 에 몇개의 자료가 들어 갈 때까지 기다린다.
         for _ in range(num_cpu_core):
-            p = multiprocessing.Process(target=self.perform_resizing)
-            p.start()
+            print("----------- ") # IMG_QUEUE 에 파일이름이 들어가고 PROCESS 가 만들어지는지체크
+            P = MULTIPROCESSING.PROCESS(TARGET=SELF.PERFORM_RESIZING)
+            P.START()
 
 
-        dl_que.join() # que 에 파일목록 작성 완료 대기
-        # perform_resize 가 Poison pill: None 으로 중지 하므로 프로세스 개수만큼 None삽입
+        DL_QUE.JOIN() # QUE 에 파일목록 작성 완료 대기
+        # PERFORM_RESIZE 가 POISON PILL: NONE 으로 중지 하므로 프로세스 개수만큼 NONE삽입
 
-        for _ in range(num_cpu_core):
-            self.img_queue.put(None)
-            print("None poison pill")
+        FOR _ IN RANGE(NUM_CPU_CORE):
+            SELF.IMG_QUEUE.PUT(NONE)
 
-        end = time.perf_counter()
+        END = TIME.PERF_COUNTER()
 
 
-        logging.info("END downloded files in {} seconds".format(end - start))
+        LOGGING.INFO("END thumbnail created in {} seconds".format(end - start))
 
 if __name__ == "__main__":
     tt = ThumbnailMakerService()
