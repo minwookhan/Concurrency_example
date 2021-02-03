@@ -54,3 +54,15 @@
    - image 다운로드가 끝난다음 img_queue 에 파일 이름이 들어간다. 따라서 img_queue 에 파일 이름이 가기 전에 multiprocess 가 만들어지면
      바로 다음 poison pill이 삽입되는 코드로 넘어가고 멀티프로세스는 처리가안된다.
      이를 방지하기위해 다운로드 실행이 되고 1~2초 정도 time.sleep(2)을 둬야 처리가 된다. 
+** Shared_memory 사용 , 다운받은 용량, 리사이즈 용량
+   - dl_que 는 class  변수로 정의 할 수 없다. class 변수는 다른 class method에 의해 값이 바뀔 수 있으므로 Serialized대상이 안된다
+     따라서 지역함수에서 dl_que를 만들고 그 지역함수 안에서 thread 를 만들어 각 thread 에게 전달해야 한다.
+   - Shared memory 는 클래스 변수로 가능하다.
+     한 class개체의 메쏘드를 multiprocessing 하는 것 이므로 그 클래스내 메쏘드가 공유하는 공간인 Class 변수로 만들어야 한다.
+   - Multiprocessing 에서 공유변수는  Main 에서 Queue 만들어 각 process의 가 주는 값을 queue  에 저장해서 취합하는 방법도 있고
+     Sharedmemory, Manager를 쓸 수 있다. 공유 값이 단일 변수이면 속도가 빠른 Sharedmemoryㄹ들 쓰자
+
+   - sharedmemory 개체의 값을 수정할 때는 락을 걸어야 한다. 그 값을 쓰기 , 읽기와 같은 하나의 동작만 할 때는 internal  lock이 자동으로 되지만
+     읽고 업데이트(쓰기) 같은 두 동작을 할 때는 명시적으로 Lock을 호출해야 한다.
+     ~with shrared변수.get_lock():
+         업데이트코드~
